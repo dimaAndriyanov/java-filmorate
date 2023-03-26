@@ -17,7 +17,6 @@ public abstract class Controller <T extends HasId> {
     }
 
     public T create(T value) {
-        validate(value);
         value.setId(getNextId());
         map.put(value.getId(), value);
         logCreationInfo(value);
@@ -25,7 +24,6 @@ public abstract class Controller <T extends HasId> {
     }
 
     public T update(T value) {
-        validate(value);
         if (map.containsKey(value.getId())) {
             map.put(value.getId(), value);
             logUpdateInfo(value);
@@ -34,8 +32,6 @@ public abstract class Controller <T extends HasId> {
             throw new ObjectNotFoundException();
         }
     }
-
-    abstract void validate(T value);
 
     abstract void logCreationInfo(T value);
 
