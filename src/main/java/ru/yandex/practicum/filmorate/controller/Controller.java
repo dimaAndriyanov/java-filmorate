@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class Controller <T extends HasId> {
+public abstract class Controller<T extends HasId> {
     private int nextId = 1;
     private final Map<Integer, T> map = new HashMap<>();
 
