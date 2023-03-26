@@ -12,7 +12,7 @@ import javax.validation.constraints.Size;
 import java.time.LocalDate;
 
 @Data
-public class Film implements HasId{
+public class Film implements HasId {
     private int id = 0;
     @NotBlank
     private final String name;
