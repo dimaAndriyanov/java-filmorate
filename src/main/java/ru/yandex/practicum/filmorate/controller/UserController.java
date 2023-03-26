@@ -42,7 +42,7 @@ public class UserController extends Controller<User> {
     }
 
     @Override
-    void logCreationInfo(User user){
+    void logCreationInfo(User user) {
         log.info("User {} has been added to catalogue", user);
     }
 
