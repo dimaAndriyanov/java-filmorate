@@ -12,7 +12,7 @@ import javax.validation.constraints.Past;
 import java.time.LocalDate;
 
 @Data
-public class User implements HasId{
+public class User implements HasId {
     private int id = 0;
     @NotBlank
     @Email
