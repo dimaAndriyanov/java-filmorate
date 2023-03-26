@@ -10,8 +10,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Target(FIELD)
 @Retention(RUNTIME)
-@Constraint(validatedBy = NotBefore_1895_12_28_Validator.class)
-public @interface NotBefore_1895_12_28 {
+@Constraint(validatedBy = NotTooOldValidator.class)
+public @interface NotTooOld {
     String message() default "Film release date must not be before 28.12.1895";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
