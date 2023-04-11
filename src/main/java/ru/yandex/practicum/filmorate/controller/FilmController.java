@@ -1,51 +1,61 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 
 import org.springframework.web.bind.annotation.*;
 
-import lombok.extern.slf4j.Slf4j;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 
 import java.util.List;
 
+@Validated
 @RestController
-@RequestMapping("films")
-@Slf4j
-public class FilmController extends Controller<Film> {
+@RequestMapping("/films")
+public class FilmController {
+    private final FilmService service;
 
-    @Override
+    @Autowired
+    public FilmController(FilmService service) {
+        this.service = service;
+    }
+
     @GetMapping
     public List<Film> getAll() {
-        return super.getAll();
+        return service.getAll();
     }
 
-    @Override
+    @GetMapping("/{id}")
+    public Film getById(@PathVariable int id) {
+        return service.getById(id);
+    }
+
     @PostMapping
-    public Film create(@Valid @RequestBody Film film) {
-        return super.create(film);
+    public Film add(@Valid @RequestBody Film film) {
+        return service.add(film);
     }
 
-    @Override
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
-        try {
-            return super.update(film);
-        } catch (ObjectNotFoundException e) {
-            log.warn("Film update failed due to absence of film with such id");
-            throw new ObjectNotFoundException("Film with such id not found");
-        }
+        return service.update(film);
     }
 
-    @Override
-    void logCreationInfo(Film film) {
-        log.info("Film {} has been added to catalogue", film);
+    @GetMapping("/popular")
+    public List<Film> getPopular(@Positive @RequestParam(required = false) Integer count) {
+        return count != null ? service.getPopular(count) : service.getPopular();
     }
 
-    @Override
-    void logUpdateInfo(Film film) {
-        log.info("Film {} has been updated", film);
+    @PutMapping("/{id}/like/{userId}")
+    public void addLikeByUser(@PathVariable int id, @PathVariable int userId) {
+        service.addLikeByUser(id, userId);
+    }
+
+    @DeleteMapping("{id}/like/{userId}")
+    public void deleteLikeByUser(@PathVariable int id, @PathVariable int userId) {
+        service.deleteLikeByUser(id, userId);
     }
 }
