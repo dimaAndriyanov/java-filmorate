@@ -24,6 +24,7 @@ class UserServiceTest {
         service.add(new User("emailD@mail.com", "loginD", LocalDate.of(2000, 4, 4)));
         service.add(new User("emailE@mail.com", "loginE", LocalDate.of(2000, 5, 5)));
     }
+
     @Test
     void addFriend() {
         assertThrows(ObjectNotFoundException.class, () -> service.addFriend(1, 6));
