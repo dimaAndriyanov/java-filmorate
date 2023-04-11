@@ -34,7 +34,7 @@ public class User implements HasId {
         }
     }
 
-    public void addFriendId (int id) {
+    public void addFriendId(int id) {
         friendsIds.add(id);
     }
 
