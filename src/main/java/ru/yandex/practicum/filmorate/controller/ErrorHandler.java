@@ -8,9 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import ru.yandex.practicum.filmorate.exception.CanNotBeFriendWithYourselfException;
-import ru.yandex.practicum.filmorate.exception.EmailAlreadyInUseException;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.*;
 import ru.yandex.practicum.filmorate.model.ErrorResponse;
 import ru.yandex.practicum.filmorate.model.ValidationErrorResponse;
 import ru.yandex.practicum.filmorate.model.Violation;
@@ -58,10 +56,11 @@ class ErrorHandler {
         return new ErrorResponse(exception.getMessage());
     }
 
-    @ExceptionHandler
+    @ExceptionHandler({EmailAlreadyInUseException.class, LoginAlreadyInUseException.class,
+            NotEqualLikesException.class, NotEqualFriendlistsException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleEmailAlreadyInUseException(EmailAlreadyInUseException exception) {
-        log.warn("Request on putting user with email already in use has been received.");
+    public ErrorResponse handlePuttingConflictingObjectException(RuntimeException exception) {
+        log.warn("Request on putting object with conflict with already existing objects has been received.");
         return new ErrorResponse(exception.getMessage());
     }
 

@@ -5,13 +5,13 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.StorageTest;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,10 +40,10 @@ class FilmServiceTest {
         assertThrows(ObjectNotFoundException.class, () -> service.addLikeByUser(6, 1));
         assertThrows(ObjectNotFoundException.class, () -> service.addLikeByUser(1, 6));
 
-        service.getAll().forEach((film) -> assertTrue(film.getLikesFromUsersIds().isEmpty()));
+        service.getAll().forEach(film -> assertTrue(film.getLikesFromUsersIds().isEmpty()));
 
         service.addLikeByUser(1, 1);
-        StorageTest.assertListEquals(service.getById(1).getLikesFromUsersIds(), List.of(1));
+        assertEquals(service.getById(1).getLikesFromUsersIds(), Set.of(1));
         assertTrue(service.getById(2).getLikesFromUsersIds().isEmpty());
         assertTrue(service.getById(3).getLikesFromUsersIds().isEmpty());
         assertTrue(service.getById(4).getLikesFromUsersIds().isEmpty());
@@ -52,8 +52,8 @@ class FilmServiceTest {
         for (int i = 2; i < 6; i++) {
             service.addLikeByUser(i, 1);
         }
-        service.getAll().forEach((film) ->
-                StorageTest.assertListEquals(film.getLikesFromUsersIds(), List.of(1)));
+        service.getAll().forEach(film ->
+                assertEquals(film.getLikesFromUsersIds(), Set.of(1)));
 
         service.addLikeByUser(5, 2);
         service.addLikeByUser(4, 2);
@@ -76,7 +76,7 @@ class FilmServiceTest {
                 service.addLikeByUser(i, j);
             }
         }
-        service.getAll().forEach((film) -> assertEquals(5, film.getLikesFromUsersIds().size()));
+        service.getAll().forEach(film -> assertEquals(5, film.getLikesFromUsersIds().size()));
 
         service.deleteLikeByUser(5, 1);
         assertEquals(4, service.getById(5).getLikesFromUsersIds().size());

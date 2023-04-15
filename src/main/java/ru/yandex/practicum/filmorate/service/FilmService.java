@@ -10,36 +10,53 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import java.util.List;
 
 @Service
-public class FilmService extends StorageService<Film> {
+public class FilmService {
+    private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 
     @Autowired
     public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
-        super(filmStorage);
+        this.filmStorage = filmStorage;
         this.userStorage = userStorage;
     }
 
+    public List<Film> getAll() {
+        return filmStorage.getAll();
+    }
+
+    public Film getById(int id) {
+        return filmStorage.getById(id);
+    }
+
+    public Film add(Film film) {
+        return filmStorage.add(film);
+    }
+
+    public Film update(Film film) {
+        return filmStorage.update(film);
+    }
+
     public void addLikeByUser(int filmId, int userId) {
-        Film film = storage.getById(filmId);
+        Film film = filmStorage.getById(filmId);
         User user = userStorage.getById(userId);
-        ((FilmStorage) storage).deleteFromFilmsPopularity(filmId);
+        filmStorage.deleteFromFilmsPopularity(filmId);
         film.addLikeFromUserId(user.getId());
-        ((FilmStorage) storage).addToFilmsPopularity(film);
+        filmStorage.addToFilmsPopularity(film);
     }
 
     public void deleteLikeByUser(int filmId, int userId) {
-        Film film = storage.getById(filmId);
+        Film film = filmStorage.getById(filmId);
         User user = userStorage.getById(userId);
-        ((FilmStorage) storage).deleteFromFilmsPopularity(filmId);
+        filmStorage.deleteFromFilmsPopularity(filmId);
         film.deleteLikeFromUserId(user.getId());
-        ((FilmStorage) storage).addToFilmsPopularity(film);
+        filmStorage.addToFilmsPopularity(film);
     }
 
     public List<Film> getPopular(int count) {
-        return ((FilmStorage) storage).getPopular(count);
+        return filmStorage.getPopular(count);
     }
 
     public List<Film> getPopular() {
-        return ((FilmStorage) storage).getPopular();
+        return filmStorage.getPopular();
     }
 }
