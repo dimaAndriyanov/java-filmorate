@@ -14,7 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
-public class User implements HasId {
+public class User {
     private int id = 0;
     @NotBlank
     @Email
@@ -40,5 +40,9 @@ public class User implements HasId {
 
     public void deleteFriendId(int id) {
         friendsIds.remove(id);
+    }
+
+    public void deleteAllFriends() {
+        friendsIds.clear();
     }
 }

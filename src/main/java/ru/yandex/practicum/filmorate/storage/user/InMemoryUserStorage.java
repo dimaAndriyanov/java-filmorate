@@ -2,28 +2,30 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.EmailAlreadyInUseException;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.*;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.InMemoryStorage;
 
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
 @Slf4j
-public class InMemoryUserStorage extends InMemoryStorage<User> implements UserStorage {
+public class InMemoryUserStorage implements UserStorage {
+    private int nextId = 1;
+    private final Map<Integer, User> users = new HashMap<>();
+
     @Override
-    public List<User> getFriendsById(int id) {
-        return getById(id).getFriendsIds().stream().map(this::getById).collect(Collectors.toList());
+    public List<User> getAll() {
+        return new ArrayList<>(users.values());
     }
 
     @Override
     public User getById(int id) {
-        try {
-            return super.getById(id);
-        } catch (ObjectNotFoundException exception) {
-            throw new ObjectNotFoundException(String.format("User with %d id not found", id));
+        User result = users.get(id);
+        if (result != null) {
+            return result;
+        } else {
+            throw new ObjectNotFoundException(String.format("User with id %d not found", id));
         }
     }
 
@@ -32,49 +34,81 @@ public class InMemoryUserStorage extends InMemoryStorage<User> implements UserSt
         if (user == null) {
             throw new NullPointerException("Can not add null user");
         }
-        if (getAll().stream().anyMatch(value -> value.getEmail().equals(user.getEmail()))) {
+        if (users.values().stream().anyMatch(value -> value.getLogin().equals(user.getLogin()))) {
+            throw new LoginAlreadyInUseException(String.format("Login %s is already in use", user.getLogin()));
+        }
+        if (users.values().stream().anyMatch(value -> value.getEmail().equals(user.getEmail()))) {
             throw new EmailAlreadyInUseException(String.format("Email address %s is already in use", user.getEmail()));
         }
         user.fillName();
-        User result = super.add(user);
-        log.info("New User with id {} has been added", result.getId());
-        return result;
+        user.setId(getNextId());
+        user.deleteAllFriends();
+        users.put(user.getId(), user);
+        log.info("New User with id {} has been added", user.getId());
+        return user;
     }
 
     @Override
     public User update(User user) {
         if (user == null) {
-            throw new NullPointerException("Can not update null value");
+            throw new NullPointerException("Can not update null user");
         }
-        try {
-            getById(user.getId());
-        } catch (ObjectNotFoundException exception) {
-            throw new ObjectNotFoundException(String.format("User with %d id not found", user.getId()));
+        if (!users.containsKey(user.getId())) {
+            throw new ObjectNotFoundException(String.format("User with id %d not found", user.getId()));
         }
-        if (getAll().stream().anyMatch(value ->
-                        value.getEmail().equals(user.getEmail()) && value.getId() != user.getId())) {
+        if (users.values().stream()
+                .filter(value -> value.getId() != user.getId())
+                .anyMatch(value -> value.getLogin().equals(user.getLogin()))) {
+            throw new LoginAlreadyInUseException(String.format("Login %s is already in use", user.getLogin()));
+        }
+        if (users.values().stream()
+                .filter(value -> value.getId() != user.getId())
+                .anyMatch(value -> value.getEmail().equals(user.getEmail()))) {
             throw new EmailAlreadyInUseException(String.format("Email address %s is already in use", user.getEmail()));
         }
+        if (!user.getFriendsIds().equals(users.get(user.getId()).getFriendsIds())) {
+            throw new NotEqualFriendlistsException("Friendlists of updated and original users must be Equal");
+        }
         user.fillName();
-        User result = super.update(user);
-        log.info("User with id {} has been updated", result.getId());
-        return result;
+        users.put(user.getId(), user);
+        log.info("User with id {} has been updated", user.getId());
+        return user;
     }
 
     @Override
     public void deleteAll() {
-        super.deleteAll();
+        users.clear();
         log.info("UserStorage has been cleared");
     }
 
     @Override
     public User deleteById(int id) {
-        try {
-            User result = super.deleteById(id);
-            log.info("User with id {} has been removed", result.getId());
-            return result;
-        } catch (ObjectNotFoundException exception) {
-            throw new ObjectNotFoundException(String.format("User with %d id not found", id));
+        User user = users.remove(id);
+        if (user != null) {
+            deleteFriendFromAllUsersById(id);
+            log.info("User with id {} has been removed", user.getId());
+            return user;
+        } else {
+            throw new ObjectNotFoundException(String.format("User with id %d not found", id));
         }
+    }
+
+    @Override
+    public List<User> getFriendsById(int id) {
+        User user = getById(id);
+        try {
+            return user.getFriendsIds().stream().map(this::getById).collect(Collectors.toList());
+        } catch (ObjectNotFoundException exception) {
+            throw new UserStorageException(
+                    String.format("Friendlist of user with id %d contains user which is not in storage", id));
+        }
+    }
+
+    private int getNextId() {
+        return nextId++;
+    }
+
+    private void deleteFriendFromAllUsersById(int id) {
+        users.values().forEach(value -> value.deleteFriendId(id));
     }
 }
