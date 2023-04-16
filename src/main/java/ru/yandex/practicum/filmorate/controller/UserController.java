@@ -1,53 +1,63 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 
 import org.springframework.web.bind.annotation.*;
 
-import lombok.extern.slf4j.Slf4j;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("users")
-@Slf4j
-public class UserController extends Controller<User> {
+@RequestMapping("/users")
+public class UserController {
+    private final UserService service;
 
-    @Override
+    @Autowired
+    public UserController(UserService service) {
+        this.service = service;
+    }
+
     @GetMapping
     public List<User> getAll() {
-        return super.getAll();
+        return service.getAll();
     }
 
-    @Override
+    @GetMapping("/{id}")
+    public User getById(@PathVariable int id) {
+        return service.getById(id);
+    }
+
     @PostMapping
-    public User create(@Valid @RequestBody User user) {
-        user.fillName();
-        return super.create(user);
+    public User add(@Valid @RequestBody User user) {
+        return service.add(user);
     }
 
-    @Override
     @PutMapping
     public User update(@Valid @RequestBody User user) {
-        try {
-            user.fillName();
-            return super.update(user);
-        } catch (ObjectNotFoundException e) {
-            log.warn("User update failed due to absence of user with such id");
-            throw new ObjectNotFoundException("User with such id not found");
-        }
+        return service.update(user);
     }
 
-    @Override
-    void logCreationInfo(User user) {
-        log.info("User {} has been added to catalogue", user);
+    @GetMapping("/{id}/friends")
+    public List<User> getFriendsById(@PathVariable int id) {
+        return service.getFriendsById(id);
     }
 
-    @Override
-    void logUpdateInfo(User user) {
-        log.info("User {} has been updated", user);
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
+        return service.getCommonFriends(id, otherId);
+    }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable int id, @PathVariable int friendId) {
+        service.addFriend(id, friendId);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void deleteFriend(@PathVariable int id, @PathVariable int friendId) {
+        service.deleteFriend(id, friendId);
     }
 }
