@@ -1,7 +1,7 @@
 # java-filmorate
 ## База данных
 ### Схема
-![Graphical representation of Database](src/main/resources/DB_scheme.png)
+![Graphical representation of Database](documents/DB_scheme.png)
 ### Пояснение
 * В таблицах films и users хранятся данные о фильмах и пользователях соответственно.
 * В таблицах genres и MPA_ratings хранятся перечни жанров и рейтингов Ассоциации кинокомпаний соответственно.
