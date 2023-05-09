@@ -29,8 +29,8 @@ public class FilmsLikesDaoImpl implements FilmsLikesDao {
         try {
             jdbcTemplate.update("insert into films_likes (film_id, user_id) values (?, ?)", filmId, userId);
             jdbcTemplate.update("update films set likes_amount = likes_amount + 1 where film_id = ?", filmId);
+        } catch (DuplicateKeyException ignored) {
         }
-        catch (DuplicateKeyException ignored) {}
     }
 
     @Override

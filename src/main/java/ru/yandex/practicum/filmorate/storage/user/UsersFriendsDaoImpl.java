@@ -34,8 +34,8 @@ public class UsersFriendsDaoImpl implements UsersFriendsDao {
         userStorage.getById(friendId);
         try {
             jdbcTemplate.update("insert into users_friends (user_id, friend_id) values (?, ?)", id, friendId);
+        } catch (DuplicateKeyException ignored) {
         }
-        catch (DuplicateKeyException ignored) {}
     }
 
     @Override
