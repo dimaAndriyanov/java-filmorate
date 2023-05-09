@@ -1,23 +1,23 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.CanNotBeFriendWithYourselfException;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
-import ru.yandex.practicum.filmorate.exception.UserStorageException;
+import ru.yandex.practicum.filmorate.storage.user.UsersFriendsDao;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService {
     private final UserStorage userStorage;
+    private final UsersFriendsDao usersFriendsDao;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage, UsersFriendsDao usersFriendsDao) {
         this.userStorage = userStorage;
+        this.usersFriendsDao = usersFriendsDao;
     }
 
     public List<User> getAll() {
@@ -37,23 +37,11 @@ public class UserService {
     }
 
     public void addFriend(int userId, int friendId) {
-        if (userId == friendId) {
-            throw new CanNotBeFriendWithYourselfException("User can not be friend with himself");
-        }
-        User user = userStorage.getById(userId);
-        User friend = userStorage.getById(friendId);
-        user.addFriendId(friendId);
-        friend.addFriendId(userId);
+        usersFriendsDao.addFriendById(userId, friendId);
     }
 
     public void deleteFriend(int userId, int friendId) {
-        if (userId == friendId) {
-            throw new CanNotBeFriendWithYourselfException("User can not be friend with himself");
-        }
-        User user = userStorage.getById(userId);
-        User friend = userStorage.getById(friendId);
-        user.deleteFriendId(friendId);
-        friend.deleteFriendId(userId);
+        usersFriendsDao.deleteFriendById(userId, friendId);
     }
 
     public List<User> getFriendsById(int id) {
@@ -61,16 +49,6 @@ public class UserService {
     }
 
     public List<User> getCommonFriends(int userId, int otherUserId) {
-        User user = userStorage.getById(userId);
-        User otherUser = userStorage.getById(otherUserId);
-        try {
-            return user.getFriendsIds().stream()
-                    .filter(id -> otherUser.getFriendsIds().contains(id))
-                    .map(userStorage::getById)
-                    .collect(Collectors.toList());
-        } catch (ObjectNotFoundException exception) {
-            throw new UserStorageException(
-                    String.format("Friendlist of user with id %d contains user which is not in storage", userId));
-        }
+        return usersFriendsDao.getCommonFriendsById(userId, otherUserId);
     }
 }

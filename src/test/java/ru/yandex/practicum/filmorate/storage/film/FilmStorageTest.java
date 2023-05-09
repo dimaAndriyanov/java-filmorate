@@ -21,9 +21,9 @@ abstract class FilmStorageTest {
 
     List<Film> addThreeFilms() {
         return List.of(
-                filmStorage.add(new Film("nameA", "descA", LocalDate.of(2000, 1, 1), 10)),
-                filmStorage.add(new Film("nameB", "descB", LocalDate.of(2000, 2, 2), 20)),
-                filmStorage.add(new Film("nameC", "descC", LocalDate.of(2000, 3, 3), 30))
+                filmStorage.add(new Film("nameA", "descA", LocalDate.of(2000, 1, 1), 10, null)),
+                filmStorage.add(new Film("nameB", "descB", LocalDate.of(2000, 2, 2), 20, null)),
+                filmStorage.add(new Film("nameC", "descC", LocalDate.of(2000, 3, 3), 30, null))
         );
     }
 
@@ -72,13 +72,13 @@ abstract class FilmStorageTest {
 
         addThreeFilms();
 
-        Film notFromStorageFilm = new Film("nameD", "descD", LocalDate.of(2000, 4, 4), 40);
+        Film notFromStorageFilm = new Film("nameD", "descD", LocalDate.of(2000, 4, 4), 40, null);
         notFromStorageFilm.setId(4);
         ObjectNotFoundException objectNotFoundException = assertThrows(ObjectNotFoundException.class,
                 () -> filmStorage.update(notFromStorageFilm));
         assertEquals("Film with id 4 not found", objectNotFoundException.getMessage());
 
-        Film filmWithDifferentLikes = new Film("nameE", "descE", LocalDate.of(2000, 5, 5), 50);
+        Film filmWithDifferentLikes = new Film("nameE", "descE", LocalDate.of(2000, 5, 5), 50, null);
         filmWithDifferentLikes.setId(1);
         filmWithDifferentLikes.addLikeFromUserId(1);
         NotEqualLikesException notEqualLikesException = assertThrows(NotEqualLikesException.class,
@@ -86,7 +86,7 @@ abstract class FilmStorageTest {
         assertEquals("Updated and original films must have equal likes", notEqualLikesException.getMessage());
 
         Film originalFilmWithIdOne = filmStorage.getById(1);
-        Film updatedFilmWithIdOne = new Film("nameF", "descF", LocalDate.of(2000, 6, 6), 60);
+        Film updatedFilmWithIdOne = new Film("nameF", "descF", LocalDate.of(2000, 6, 6), 60, null);
         updatedFilmWithIdOne.setId(1);
         filmStorage.update(updatedFilmWithIdOne);
         assertEquals(updatedFilmWithIdOne, filmStorage.getById(1));
@@ -130,7 +130,7 @@ abstract class FilmStorageTest {
         assertNotNull(filmStorage.getPopular());
         assertTrue(filmStorage.getPopular().isEmpty());
 
-        Film filmWithThreeLikes = new Film("nameA", "descA", LocalDate.of(2000, 1, 1), 10);
+        Film filmWithThreeLikes = new Film("nameA", "descA", LocalDate.of(2000, 1, 1), 10, null);
         filmStorage.add(filmWithThreeLikes);
         filmStorage.deleteFromFilmsPopularity(1);
         filmWithThreeLikes.addLikeFromUserId(1);
@@ -138,16 +138,16 @@ abstract class FilmStorageTest {
         filmWithThreeLikes.addLikeFromUserId(3);
         filmStorage.addToFilmsPopularity(filmWithThreeLikes);
 
-        Film filmWithZeroLikes = new Film("nameB", "descB", LocalDate.of(2000, 2, 2), 20);
+        Film filmWithZeroLikes = new Film("nameB", "descB", LocalDate.of(2000, 2, 2), 20, null);
         filmStorage.add(filmWithZeroLikes);
 
-        Film filmWithOneLike = new Film("nameC", "descC", LocalDate.of(2000, 3, 3), 30);
+        Film filmWithOneLike = new Film("nameC", "descC", LocalDate.of(2000, 3, 3), 30, null);
         filmStorage.add(filmWithOneLike);
         filmStorage.deleteFromFilmsPopularity(3);
         filmWithOneLike.addLikeFromUserId(1);
         filmStorage.addToFilmsPopularity(filmWithOneLike);
 
-        Film anotherFilmWithThreeLikes = new Film("nameD", "descD", LocalDate.of(2000, 4, 4), 40);
+        Film anotherFilmWithThreeLikes = new Film("nameD", "descD", LocalDate.of(2000, 4, 4), 40, null);
         filmStorage.add(anotherFilmWithThreeLikes);
         filmStorage.deleteFromFilmsPopularity(4);
         anotherFilmWithThreeLikes.addLikeFromUserId(1);
@@ -155,7 +155,7 @@ abstract class FilmStorageTest {
         anotherFilmWithThreeLikes.addLikeFromUserId(5);
         filmStorage.addToFilmsPopularity(anotherFilmWithThreeLikes);
 
-        Film filmWithFiveLikes = new Film("nameE", "descE", LocalDate.of(2000, 5, 5), 50);
+        Film filmWithFiveLikes = new Film("nameE", "descE", LocalDate.of(2000, 5, 5), 50, null);
         filmStorage.add(filmWithFiveLikes);
         filmStorage.deleteFromFilmsPopularity(5);
         filmWithFiveLikes.addLikeFromUserId(1);
@@ -179,7 +179,7 @@ abstract class FilmStorageTest {
         assertEquals(topThreeFilms.get(1), anotherFilmWithThreeLikes);
         assertEquals(topThreeFilms.get(2), filmWithThreeLikes);
 
-        Film updatedFilmWithOneLike = new Film("nameF", "descF", LocalDate.of(2000, 6, 6), 60);
+        Film updatedFilmWithOneLike = new Film("nameF", "descF", LocalDate.of(2000, 6, 6), 60, null);
         updatedFilmWithOneLike.setId(3);
         updatedFilmWithOneLike.addLikeFromUserId(1);
         filmStorage.update(updatedFilmWithOneLike);
@@ -200,20 +200,20 @@ abstract class FilmStorageTest {
 
     @Test
     void deleteAllLikesFromUserById() {
-        Film firstFilm = new Film("nameA", "descA", LocalDate.of(2000, 1, 1), 10);
+        Film firstFilm = new Film("nameA", "descA", LocalDate.of(2000, 1, 1), 10, null);
         filmStorage.add(firstFilm);
         filmStorage.deleteFromFilmsPopularity(1);
         firstFilm.addLikeFromUserId(1);
         firstFilm.addLikeFromUserId(2);
         filmStorage.addToFilmsPopularity(firstFilm);
 
-        Film secondFilm = new Film("nameB", "descB", LocalDate.of(2000, 2, 2), 20);
+        Film secondFilm = new Film("nameB", "descB", LocalDate.of(2000, 2, 2), 20, null);
         filmStorage.add(secondFilm);
         filmStorage.deleteFromFilmsPopularity(2);
         secondFilm.addLikeFromUserId(1);
         filmStorage.addToFilmsPopularity(secondFilm);
 
-        Film thirdFilm = new Film("nameC", "descC", LocalDate.of(2000, 3, 3), 30);
+        Film thirdFilm = new Film("nameC", "descC", LocalDate.of(2000, 3, 3), 30, null);
         filmStorage.add(thirdFilm);
 
         List<Film> popularFilms = filmStorage.getPopular();
