@@ -17,7 +17,7 @@ public class UserMapper {
         Map<Integer, User> users = new LinkedHashMap<>();
         while (rowSet.next()) {
             if (!users.containsKey(rowSet.getInt("user_id"))) {
-                User user = new User (
+                User user = new User(
                         rowSet.getString("email"),
                         rowSet.getString("login"),
                         LocalDate.parse(rowSet.getString("birthday"), DateTimeFormatter.ofPattern("yyyy-MM-dd"))
