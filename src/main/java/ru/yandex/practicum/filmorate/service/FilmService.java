@@ -5,20 +5,20 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.film.FilmsLikesDao;
+import ru.yandex.practicum.filmorate.storage.film.FilmsLikesDbStorage;
 
 import java.util.List;
 
 @Service
 public class FilmService {
     private final FilmStorage filmStorage;
-    private final FilmsLikesDao filmsLikesDao;
+    private final FilmsLikesDbStorage filmsLikesDbStorage;
 
     @Autowired
     public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
-                       FilmsLikesDao filmsLikesDao) {
+                       FilmsLikesDbStorage filmsLikesDbStorage) {
         this.filmStorage = filmStorage;
-        this.filmsLikesDao = filmsLikesDao;
+        this.filmsLikesDbStorage = filmsLikesDbStorage;
     }
 
     public List<Film> getAll() {
@@ -38,11 +38,11 @@ public class FilmService {
     }
 
     public void addLikeByUser(int filmId, int userId) {
-        filmsLikesDao.addLikeFromUser(filmId, userId);
+        filmsLikesDbStorage.addLikeFromUser(filmId, userId);
     }
 
     public void deleteLikeByUser(int filmId, int userId) {
-        filmsLikesDao.deleteLikeFromUser(filmId, userId);
+        filmsLikesDbStorage.deleteLikeFromUser(filmId, userId);
     }
 
     public List<Film> getPopular(int count) {

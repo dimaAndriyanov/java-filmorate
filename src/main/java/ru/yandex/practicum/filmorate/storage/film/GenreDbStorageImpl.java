@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.storage.DbStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,22 +13,21 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class GenreDaoImpl implements GenreDao {
-    private final JdbcTemplate jdbcTemplate;
-
+public class GenreDbStorageImpl extends DbStorage implements GenreDbStorage {
     @Autowired
-    public GenreDaoImpl(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public GenreDbStorageImpl(JdbcTemplate jdbcTemplate) {
+        super(jdbcTemplate);
     }
 
     @Override
     public List<Genre> getAll() {
-        return jdbcTemplate.query("select * from genres", (resultSet, rowNumber) -> mapGenre(resultSet));
+        return jdbcTemplate.query("select genre_id, genre_name from genres",
+                (resultSet, rowNumber) -> mapGenre(resultSet));
     }
 
     @Override
     public Genre getById(int id) {
-        Optional<Genre> resultGenre = jdbcTemplate.query("select * from genres where genre_id = ?",
+        Optional<Genre> resultGenre = jdbcTemplate.query("select genre_id, genre_name from genres where genre_id = ?",
                 (resultSet, rowNumber) -> mapGenre(resultSet), id)
                 .stream().findAny();
         if (resultGenre.isPresent()) {
@@ -40,7 +40,7 @@ public class GenreDaoImpl implements GenreDao {
     @Override
     public List<Genre> getByFilmId(int filmId) {
         String sqlSubQuery = "(select genre_id from films_genres where film_id = ?)";
-        return jdbcTemplate.query("select * from genres where genre_id in " + sqlSubQuery,
+        return jdbcTemplate.query("select genre_id, genre_name from genres where genre_id in " + sqlSubQuery,
                 (resultSet, rowNumber) -> mapGenre(resultSet), filmId);
     }
 

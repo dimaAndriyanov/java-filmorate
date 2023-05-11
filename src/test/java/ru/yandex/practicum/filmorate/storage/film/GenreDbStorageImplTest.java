@@ -18,13 +18,13 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-class GenreDaoImplTest {
-    private final GenreDao genreDao;
+class GenreDbStorageImplTest {
+    private final GenreDbStorage genreDbStorage;
     private final FilmDbStorage filmDbStorage;
 
     @Test
     void testGetAll() {
-        List<Genre> genres = genreDao.getAll();
+        List<Genre> genres = genreDbStorage.getAll();
         assertEquals(6, genres.size());
 
         Genre testGenre = new Genre();
@@ -56,18 +56,18 @@ class GenreDaoImplTest {
 
     @Test
     void testGetById() {
-        ObjectNotFoundException exception = assertThrows(ObjectNotFoundException.class, () -> genreDao.getById(7));
+        ObjectNotFoundException exception = assertThrows(ObjectNotFoundException.class, () -> genreDbStorage.getById(7));
         assertEquals("Genre with id 7 not found", exception.getMessage());
 
         Genre documentaryGenre = new Genre();
         documentaryGenre.setId(5);
         documentaryGenre.setName("Документальный");
-        assertEquals(documentaryGenre, genreDao.getById(5));
+        assertEquals(documentaryGenre, genreDbStorage.getById(5));
     }
 
     @Test
     void testGetByFilmId() {
-        List<Genre> notExistingFilmGenres = genreDao.getByFilmId(9999);
+        List<Genre> notExistingFilmGenres = genreDbStorage.getByFilmId(9999);
         assertTrue(notExistingFilmGenres.isEmpty());
 
         MpaRating mpa = new MpaRating();
@@ -91,13 +91,13 @@ class GenreDaoImplTest {
         comedyGenre.setName("Комедия");
         dramaGenre.setName("Драма");
 
-        assertTrue(genreDao.getByFilmId(film001Id).isEmpty());
+        assertTrue(genreDbStorage.getByFilmId(film001Id).isEmpty());
 
-        List<Genre> dramaFilmsGenres = genreDao.getByFilmId(film002Id);
+        List<Genre> dramaFilmsGenres = genreDbStorage.getByFilmId(film002Id);
         assertEquals(1, dramaFilmsGenres.size());
         assertEquals(dramaGenre, dramaFilmsGenres.get(0));
 
-        List<Genre> comedyDramaFilmsGenres = genreDao.getByFilmId(film003Id);
+        List<Genre> comedyDramaFilmsGenres = genreDbStorage.getByFilmId(film003Id);
         assertEquals(2, comedyDramaFilmsGenres.size());
         assertTrue(comedyDramaFilmsGenres.contains(dramaGenre));
         assertTrue(comedyDramaFilmsGenres.contains(comedyGenre));

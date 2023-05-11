@@ -1,38 +1,43 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Repository;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
-@Repository
-public class UserMapper implements RowMapper<User> {
-    private final JdbcTemplate jdbcTemplate;
+@Component
+public class UserMapper {
+    public List<User> mapUsers(SqlRowSet rowSet) {
+        Map<Integer, User> users = new LinkedHashMap<>();
+        while (rowSet.next()) {
+            if (!users.containsKey(rowSet.getInt("user_id"))) {
+                User user = new User (
+                        rowSet.getString("email"),
+                        rowSet.getString("login"),
+                        LocalDate.parse(rowSet.getString("birthday"), DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                );
+                user.setId(rowSet.getInt("user_id"));
+                user.setName(rowSet.getString("user_name"));
 
-    @Autowired
-    public UserMapper(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+                if (rowSet.getInt("friend_id") != 0) {
+                    user.addFriendId(rowSet.getInt("friend_id"));
+                }
 
-    @Override
-    public User mapRow(ResultSet resultSet, int rowNumber) throws SQLException {
-        User user = new User(
-                resultSet.getString("email"),
-                resultSet.getString("login"),
-                LocalDate.parse(resultSet.getString("birthday"), DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-        );
-        user.setId(resultSet.getInt("user_id"));
-        user.setName(resultSet.getString("user_name"));
+                users.put(user.getId(), user);
+            } else {
+                User user = users.get(rowSet.getInt("user_id"));
 
-        String sql = "select friend_id from users_friends where user_id = ?";
-        jdbcTemplate.query(sql, (resSet, rowNum) -> resSet.getInt("friend_id"), user.getId())
-                .forEach(user::addFriendId);
-        return user;
+                if (rowSet.getInt("friend_id") != 0) {
+                    user.addFriendId(rowSet.getInt("friend_id"));
+                }
+            }
+        }
+        return new ArrayList<>(users.values());
     }
 }

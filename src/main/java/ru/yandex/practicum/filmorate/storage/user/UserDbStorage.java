@@ -8,39 +8,52 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.*;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.DbStorage;
 
 import java.sql.PreparedStatement;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 @Slf4j
-public class UserDbStorage implements UserStorage {
-    private final JdbcTemplate jdbcTemplate;
+public class UserDbStorage extends DbStorage implements UserStorage {
     private final UserMapper userMapper;
 
     @Autowired
     public UserDbStorage(JdbcTemplate jdbcTemplate, UserMapper userMapper) {
-        this.jdbcTemplate = jdbcTemplate;
+        super(jdbcTemplate);
         this.userMapper = userMapper;
     }
 
     @Override
     public List<User> getAll() {
-        String sql = "select * from users";
-        return jdbcTemplate.query(sql, userMapper);
+        String sql = "select u.user_id, " +
+                "u.user_name, " +
+                "u.email, " +
+                "u.login, " +
+                "u.birthday, " +
+                "uf.friend_id, " +
+                "from users u " +
+                "left outer join users_friends uf on u.user_id = uf.user_id";
+        return userMapper.mapUsers(jdbcTemplate.queryForRowSet(sql));
     }
 
     @Override
     public User getById(int id) {
-        String sql = "select * from users where user_id = ?";
-        Optional<User> result =
-                jdbcTemplate.query(sql, userMapper, id).stream().findAny();
-        if (result.isPresent()) {
-            return result.get();
-        } else {
+        String sql = "select u.user_id, " +
+                "u.user_name, " +
+                "u.email, " +
+                "u.login, " +
+                "u.birthday, " +
+                "uf.friend_id, " +
+                "from users u " +
+                "left outer join users_friends uf on u.user_id = uf.user_id " +
+                "where u.user_id = ?";
+        List<User> users = userMapper.mapUsers(jdbcTemplate.queryForRowSet(sql, id));
+        if (users.isEmpty()) {
             throw new ObjectNotFoundException(String.format("User with id %d not found", id));
+        } else {
+            return users.get(0);
         }
     }
 
@@ -134,7 +147,17 @@ public class UserDbStorage implements UserStorage {
     @Override
     public List<User> getFriendsById(int id) {
         getById(id);
+        String sql = "select u.user_id, " +
+                "u.user_name, " +
+                "u.email, " +
+                "u.login, " +
+                "u.birthday, " +
+                "uf.friend_id, " +
+                "from users u " +
+                "left outer join users_friends uf on u.user_id = uf.user_id " +
+                "where u.user_id in ";
+        getById(id);
         String sqlSubQuery = "(select friend_id from users_friends where user_id = ?)";
-        return jdbcTemplate.query("select * from users where user_id in " + sqlSubQuery, userMapper, id);
+        return userMapper.mapUsers(jdbcTemplate.queryForRowSet(sql + sqlSubQuery, id));
     }
 }

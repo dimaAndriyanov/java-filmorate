@@ -4,7 +4,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.List;
 
-public interface GenreDao {
+public interface GenreDbStorage {
     List<Genre> getAll();
 
     Genre getById(int id);

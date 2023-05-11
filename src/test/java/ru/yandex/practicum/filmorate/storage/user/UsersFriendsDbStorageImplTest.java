@@ -16,8 +16,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-class UsersFriendsDaoImplTest {
-    private final UsersFriendsDao usersFriendsDao;
+class UsersFriendsDbStorageImplTest {
+    private final UsersFriendsDbStorage usersFriendsDbStorage;
     private final UserDbStorage userStorage;
 
     @Test
@@ -28,37 +28,37 @@ class UsersFriendsDaoImplTest {
 
         CanNotBeFriendWithYourselfException canNotBeFriendWithYourselfException =
                 assertThrows(CanNotBeFriendWithYourselfException.class,
-                        () -> usersFriendsDao.addFriendById(user001Id, user001Id));
+                        () -> usersFriendsDbStorage.addFriendById(user001Id, user001Id));
         assertEquals("User can not be friend with himself", canNotBeFriendWithYourselfException.getMessage());
 
         ObjectNotFoundException objectNotFoundException =
-                assertThrows(ObjectNotFoundException.class, () -> usersFriendsDao.addFriendById(9999, user001Id));
+                assertThrows(ObjectNotFoundException.class, () -> usersFriendsDbStorage.addFriendById(9999, user001Id));
         assertEquals("User with id 9999 not found", objectNotFoundException.getMessage());
         objectNotFoundException =
-                assertThrows(ObjectNotFoundException.class, () -> usersFriendsDao.addFriendById(user001Id, 9999));
+                assertThrows(ObjectNotFoundException.class, () -> usersFriendsDbStorage.addFriendById(user001Id, 9999));
         assertEquals("User with id 9999 not found", objectNotFoundException.getMessage());
 
         assertTrue(userStorage.getFriendsById(user001Id).isEmpty());
         assertTrue(userStorage.getFriendsById(user002Id).isEmpty());
         assertTrue(userStorage.getFriendsById(user003Id).isEmpty());
 
-        usersFriendsDao.addFriendById(user001Id, user002Id);
+        usersFriendsDbStorage.addFriendById(user001Id, user002Id);
         assertEquals(1, userStorage.getFriendsById(user001Id).size());
         assertEquals(user002Id, userStorage.getFriendsById(user001Id).get(0).getId());
         assertTrue(userStorage.getFriendsById(user002Id).isEmpty());
 
-        usersFriendsDao.addFriendById(user001Id, user002Id);
+        usersFriendsDbStorage.addFriendById(user001Id, user002Id);
         assertEquals(1, userStorage.getFriendsById(user001Id).size());
         assertEquals(user002Id, userStorage.getFriendsById(user001Id).get(0).getId());
         assertTrue(userStorage.getFriendsById(user002Id).isEmpty());
 
-        usersFriendsDao.addFriendById(user002Id, user001Id);
+        usersFriendsDbStorage.addFriendById(user002Id, user001Id);
         assertEquals(1, userStorage.getFriendsById(user001Id).size());
         assertEquals(user002Id, userStorage.getFriendsById(user001Id).get(0).getId());
         assertEquals(1, userStorage.getFriendsById(user002Id).size());
         assertEquals(user001Id, userStorage.getFriendsById(user002Id).get(0).getId());
 
-        usersFriendsDao.addFriendById(user002Id, user001Id);
+        usersFriendsDbStorage.addFriendById(user002Id, user001Id);
         assertEquals(1, userStorage.getFriendsById(user001Id).size());
         assertEquals(user002Id, userStorage.getFriendsById(user001Id).get(0).getId());
         assertEquals(1, userStorage.getFriendsById(user002Id).size());
@@ -66,58 +66,58 @@ class UsersFriendsDaoImplTest {
 
         canNotBeFriendWithYourselfException =
                 assertThrows(CanNotBeFriendWithYourselfException.class,
-                        () -> usersFriendsDao.deleteFriendById(user001Id, user001Id));
+                        () -> usersFriendsDbStorage.deleteFriendById(user001Id, user001Id));
         assertEquals("User can not be friend with himself", canNotBeFriendWithYourselfException.getMessage());
 
         objectNotFoundException =
-                assertThrows(ObjectNotFoundException.class, () -> usersFriendsDao.deleteFriendById(9999, user001Id));
+                assertThrows(ObjectNotFoundException.class, () -> usersFriendsDbStorage.deleteFriendById(9999, user001Id));
         assertEquals("User with id 9999 not found", objectNotFoundException.getMessage());
         objectNotFoundException =
-                assertThrows(ObjectNotFoundException.class, () -> usersFriendsDao.deleteFriendById(user001Id, 9999));
+                assertThrows(ObjectNotFoundException.class, () -> usersFriendsDbStorage.deleteFriendById(user001Id, 9999));
         assertEquals("User with id 9999 not found", objectNotFoundException.getMessage());
 
-        usersFriendsDao.deleteFriendById(user001Id, user002Id);
+        usersFriendsDbStorage.deleteFriendById(user001Id, user002Id);
         assertTrue(userStorage.getFriendsById(user001Id).isEmpty());
         assertEquals(1, userStorage.getFriendsById(user002Id).size());
         assertEquals(user001Id, userStorage.getFriendsById(user002Id).get(0).getId());
 
-        usersFriendsDao.deleteFriendById(user001Id, user002Id);
+        usersFriendsDbStorage.deleteFriendById(user001Id, user002Id);
         assertTrue(userStorage.getFriendsById(user001Id).isEmpty());
         assertEquals(1, userStorage.getFriendsById(user002Id).size());
         assertEquals(user001Id, userStorage.getFriendsById(user002Id).get(0).getId());
 
-        usersFriendsDao.deleteFriendById(user002Id, user001Id);
+        usersFriendsDbStorage.deleteFriendById(user002Id, user001Id);
         assertTrue(userStorage.getFriendsById(user001Id).isEmpty());
         assertTrue(userStorage.getFriendsById(user002Id).isEmpty());
 
-        usersFriendsDao.deleteFriendById(user002Id, user001Id);
+        usersFriendsDbStorage.deleteFriendById(user002Id, user001Id);
         assertTrue(userStorage.getFriendsById(user001Id).isEmpty());
         assertTrue(userStorage.getFriendsById(user002Id).isEmpty());
 
         objectNotFoundException =
                 assertThrows(ObjectNotFoundException.class, () ->
-                        usersFriendsDao.getCommonFriendsById(9999, user001Id));
+                        usersFriendsDbStorage.getCommonFriendsById(9999, user001Id));
         assertEquals("User with id 9999 not found", objectNotFoundException.getMessage());
         objectNotFoundException =
                 assertThrows(ObjectNotFoundException.class,
-                        () -> usersFriendsDao.getCommonFriendsById(user001Id, 9999));
+                        () -> usersFriendsDbStorage.getCommonFriendsById(user001Id, 9999));
         assertEquals("User with id 9999 not found", objectNotFoundException.getMessage());
 
-        assertTrue(usersFriendsDao.getCommonFriendsById(user001Id, user002Id).isEmpty());
+        assertTrue(usersFriendsDbStorage.getCommonFriendsById(user001Id, user002Id).isEmpty());
 
-        usersFriendsDao.addFriendById(user001Id, user002Id);
-        assertTrue(usersFriendsDao.getCommonFriendsById(user001Id, user002Id).isEmpty());
+        usersFriendsDbStorage.addFriendById(user001Id, user002Id);
+        assertTrue(usersFriendsDbStorage.getCommonFriendsById(user001Id, user002Id).isEmpty());
 
-        usersFriendsDao.addFriendById(user001Id, user003Id);
-        usersFriendsDao.addFriendById(user002Id, user003Id);
-        usersFriendsDao.addFriendById(user003Id, user001Id);
+        usersFriendsDbStorage.addFriendById(user001Id, user003Id);
+        usersFriendsDbStorage.addFriendById(user002Id, user003Id);
+        usersFriendsDbStorage.addFriendById(user003Id, user001Id);
 
-        assertEquals(1, usersFriendsDao.getCommonFriendsById(user001Id, user002Id).size());
-        assertEquals(user003Id, usersFriendsDao.getCommonFriendsById(user001Id, user002Id).get(0).getId());
+        assertEquals(1, usersFriendsDbStorage.getCommonFriendsById(user001Id, user002Id).size());
+        assertEquals(user003Id, usersFriendsDbStorage.getCommonFriendsById(user001Id, user002Id).get(0).getId());
 
-        assertTrue(usersFriendsDao.getCommonFriendsById(user002Id, user003Id).isEmpty());
+        assertTrue(usersFriendsDbStorage.getCommonFriendsById(user002Id, user003Id).isEmpty());
 
-        assertEquals(1, usersFriendsDao.getCommonFriendsById(user003Id, user003Id).size());
-        assertEquals(user001Id, usersFriendsDao.getCommonFriendsById(user003Id, user003Id).get(0).getId());
+        assertEquals(1, usersFriendsDbStorage.getCommonFriendsById(user003Id, user003Id).size());
+        assertEquals(user001Id, usersFriendsDbStorage.getCommonFriendsById(user003Id, user003Id).get(0).getId());
     }
 }

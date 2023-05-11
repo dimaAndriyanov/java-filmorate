@@ -24,10 +24,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class FilmDbStorageTest {
     private final FilmDbStorage filmStorage;
-    private final MpaRatingDao mpaRatingDao;
-    private final GenreDao genreDao;
+    private final MpaRatingDbStorage mpaRatingDbStorage;
+    private final GenreDbStorage genreDbStorage;
     private final UserDbStorage userStorage;
-    private final FilmsLikesDao filmsLikesDao;
+    private final FilmsLikesDbStorage filmsLikesDbStorage;
     private final JdbcTemplate jdbcTemplate;
 
     @Test
@@ -84,13 +84,13 @@ class FilmDbStorageTest {
         assertTrue(filmStorage.getById(film021.getId()).getGenres().isEmpty());
 
         assertEquals(1, filmStorage.getById(film022.getId()).getGenres().size());
-        assertTrue(filmStorage.getById(film022.getId()).getGenres().contains(genreDao.getById(1)));
+        assertTrue(filmStorage.getById(film022.getId()).getGenres().contains(genreDbStorage.getById(1)));
 
-        assertEquals(mpaRatingDao.getById(2), filmStorage.getById(film022.getId()).getMpa());
+        assertEquals(mpaRatingDbStorage.getById(2), filmStorage.getById(film022.getId()).getMpa());
 
         assertEquals(2, filmStorage.getById(film023.getId()).getGenres().size());
-        assertTrue(filmStorage.getById(film023.getId()).getGenres().contains(genreDao.getById(2)));
-        assertTrue(filmStorage.getById(film023.getId()).getGenres().contains(genreDao.getById(3)));
+        assertTrue(filmStorage.getById(film023.getId()).getGenres().contains(genreDbStorage.getById(2)));
+        assertTrue(filmStorage.getById(film023.getId()).getGenres().contains(genreDbStorage.getById(3)));
 
         nullPointerException = assertThrows(NullPointerException.class, () -> filmStorage.update(null));
         assertEquals("Can not update null film", nullPointerException.getMessage());
@@ -125,25 +125,25 @@ class FilmDbStorageTest {
         filmStorage.update(updatedFilm023);
 
         assertEquals(2, filmStorage.getById(film021.getId()).getGenres().size());
-        assertTrue(filmStorage.getById(film021.getId()).getGenres().contains(genreDao.getById(2)));
-        assertTrue(filmStorage.getById(film021.getId()).getGenres().contains(genreDao.getById(3)));
+        assertTrue(filmStorage.getById(film021.getId()).getGenres().contains(genreDbStorage.getById(2)));
+        assertTrue(filmStorage.getById(film021.getId()).getGenres().contains(genreDbStorage.getById(3)));
 
         assertTrue(filmStorage.getById(film022.getId()).getGenres().isEmpty());
-        assertEquals(mpaRatingDao.getById(1), filmStorage.getById(film022.getId()).getMpa());
+        assertEquals(mpaRatingDbStorage.getById(1), filmStorage.getById(film022.getId()).getMpa());
 
         assertEquals(1, filmStorage.getById(film023.getId()).getGenres().size());
-        assertTrue(filmStorage.getById(film023.getId()).getGenres().contains(genreDao.getById(1)));
+        assertTrue(filmStorage.getById(film023.getId()).getGenres().contains(genreDbStorage.getById(1)));
 
         User user021 = userStorage.add(new User("e021@mail.ru", "login021", LocalDate.of(1990, 3, 1)));
         User user022 = userStorage.add(new User("e022@mail.ru", "login022", LocalDate.of(1990, 3, 2)));
         User user023 = userStorage.add(new User("e023@mail.ru", "login023", LocalDate.of(1990, 3, 3)));
 
-        filmsLikesDao.addLikeFromUser(film022.getId(), user021.getId());
-        filmsLikesDao.addLikeFromUser(film022.getId(), user022.getId());
-        filmsLikesDao.addLikeFromUser(film022.getId(), user023.getId());
+        filmsLikesDbStorage.addLikeFromUser(film022.getId(), user021.getId());
+        filmsLikesDbStorage.addLikeFromUser(film022.getId(), user022.getId());
+        filmsLikesDbStorage.addLikeFromUser(film022.getId(), user023.getId());
 
-        filmsLikesDao.addLikeFromUser(film023.getId(), user021.getId());
-        filmsLikesDao.addLikeFromUser(film023.getId(), user022.getId());
+        filmsLikesDbStorage.addLikeFromUser(film023.getId(), user021.getId());
+        filmsLikesDbStorage.addLikeFromUser(film023.getId(), user022.getId());
 
         films = filmStorage.getPopular();
 
@@ -152,8 +152,8 @@ class FilmDbStorageTest {
         assertEquals(filmStorage.getById(film023.getId()), films.get(1));
         assertEquals(filmStorage.getById(film021.getId()), films.get(2));
 
-        filmsLikesDao.deleteLikeFromUser(film022.getId(), user021.getId());
-        filmsLikesDao.deleteLikeFromUser(film022.getId(), user022.getId());
+        filmsLikesDbStorage.deleteLikeFromUser(film022.getId(), user021.getId());
+        filmsLikesDbStorage.deleteLikeFromUser(film022.getId(), user022.getId());
 
         films = filmStorage.getPopular();
 

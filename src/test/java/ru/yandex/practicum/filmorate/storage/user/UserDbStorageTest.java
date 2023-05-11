@@ -11,7 +11,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storage.film.FilmsLikesDao;
+import ru.yandex.practicum.filmorate.storage.film.FilmsLikesDbStorage;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -23,9 +23,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class UserDbStorageTest {
     private final UserDbStorage userStorage;
-    private final UsersFriendsDao usersFriendsDao;
+    private final UsersFriendsDbStorage usersFriendsDbStorage;
     private final FilmDbStorage filmStorage;
-    private final FilmsLikesDao filmsLikesDao;
+    private final FilmsLikesDbStorage filmsLikesDbStorage;
     private final JdbcTemplate jdbcTemplate;
 
     @Test
@@ -115,9 +115,9 @@ class UserDbStorageTest {
                 () -> userStorage.getFriendsById(9999));
         assertEquals("User with id 9999 not found", objectNotFoundException.getMessage());
 
-        usersFriendsDao.addFriendById(user011.getId(), user012.getId());
-        usersFriendsDao.addFriendById(user011.getId(), user013.getId());
-        usersFriendsDao.addFriendById(user012.getId(), user013.getId());
+        usersFriendsDbStorage.addFriendById(user011.getId(), user012.getId());
+        usersFriendsDbStorage.addFriendById(user011.getId(), user013.getId());
+        usersFriendsDbStorage.addFriendById(user012.getId(), user013.getId());
 
         assertEquals(2, userStorage.getFriendsById(user011.getId()).size());
         assertTrue(userStorage.getFriendsById(user011.getId()).contains(userStorage.getById(user012.getId())));
@@ -136,7 +136,7 @@ class UserDbStorageTest {
         mpa.setId(1);
         Film film011 = new Film("name011", "desc011", LocalDate.of(2000, 2, 1), 11, mpa);
         film011 = filmStorage.add(film011);
-        filmsLikesDao.addLikeFromUser(film011.getId(), user012.getId());
+        filmsLikesDbStorage.addLikeFromUser(film011.getId(), user012.getId());
 
         assertEquals(2, jdbcTemplate.query("select * from users_friends where user_id = ? or friend_id = ?",
                 (rs, rn) -> rs.getInt("user_id"), user012.getId(), user012.getId()).size());

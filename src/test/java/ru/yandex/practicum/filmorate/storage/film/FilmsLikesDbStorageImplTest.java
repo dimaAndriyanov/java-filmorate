@@ -19,8 +19,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-class FilmsLikesDaoImplTest {
-    private final FilmsLikesDao filmsLikesDao;
+class FilmsLikesDbStorageImplTest {
+    private final FilmsLikesDbStorage filmsLikesDbStorage;
     private final FilmDbStorage filmStorage;
     private final UserDbStorage userStorage;
     private final JdbcTemplate jdbcTemplate;
@@ -33,10 +33,10 @@ class FilmsLikesDaoImplTest {
         int userId = userStorage.add(new User("e@mail.ru", "login", LocalDate.of(1990, 1, 1))).getId();
 
         ObjectNotFoundException exception = assertThrows(ObjectNotFoundException.class,
-                () -> filmsLikesDao.addLikeFromUser(9999, userId));
+                () -> filmsLikesDbStorage.addLikeFromUser(9999, userId));
         assertEquals("Film with id 9999 not found", exception.getMessage());
 
-        exception = assertThrows(ObjectNotFoundException.class, () -> filmsLikesDao.addLikeFromUser(filmId, 9999));
+        exception = assertThrows(ObjectNotFoundException.class, () -> filmsLikesDbStorage.addLikeFromUser(filmId, 9999));
         assertEquals("User with id 9999 not found", exception.getMessage());
 
         int likesAmount = jdbcTemplate.query("select likes_amount from films where film_id = ?",
@@ -45,7 +45,7 @@ class FilmsLikesDaoImplTest {
         assertEquals(0, jdbcTemplate.query("select user_id from films_likes where film_id = ?",
                 (rs, rn) -> rs.getInt("user_id"), userId).size());
 
-        filmsLikesDao.addLikeFromUser(filmId, userId);
+        filmsLikesDbStorage.addLikeFromUser(filmId, userId);
         likesAmount = jdbcTemplate.query("select likes_amount from films where film_id = ?",
                 (rs, rn) -> rs.getInt("likes_amount"), filmId).get(0);
         assertEquals(1, likesAmount);
@@ -54,7 +54,7 @@ class FilmsLikesDaoImplTest {
         assertEquals(userId, jdbcTemplate.query("select user_id from films_likes where film_id = ?",
                 (rs, rn) -> rs.getInt("user_id"), filmId).get(0));
 
-        filmsLikesDao.addLikeFromUser(filmId, userId);
+        filmsLikesDbStorage.addLikeFromUser(filmId, userId);
         likesAmount = jdbcTemplate.query("select likes_amount from films where film_id = ?",
                 (rs, rn) -> rs.getInt("likes_amount"), filmId).get(0);
         assertEquals(1, likesAmount);
@@ -63,20 +63,20 @@ class FilmsLikesDaoImplTest {
         assertEquals(userId, jdbcTemplate.query("select user_id from films_likes where film_id = ?",
                 (rs, rn) -> rs.getInt("user_id"), filmId).get(0));
 
-        exception = assertThrows(ObjectNotFoundException.class, () -> filmsLikesDao.deleteLikeFromUser(9999, userId));
+        exception = assertThrows(ObjectNotFoundException.class, () -> filmsLikesDbStorage.deleteLikeFromUser(9999, userId));
         assertEquals("Film with id 9999 not found", exception.getMessage());
 
-        exception = assertThrows(ObjectNotFoundException.class, () -> filmsLikesDao.deleteLikeFromUser(filmId, 9999));
+        exception = assertThrows(ObjectNotFoundException.class, () -> filmsLikesDbStorage.deleteLikeFromUser(filmId, 9999));
         assertEquals("User with id 9999 not found", exception.getMessage());
 
-        filmsLikesDao.deleteLikeFromUser(filmId, userId);
+        filmsLikesDbStorage.deleteLikeFromUser(filmId, userId);
         likesAmount = jdbcTemplate.query("select likes_amount from films where film_id = ?",
                 (rs, rn) -> rs.getInt("likes_amount"), filmId).get(0);
         assertEquals(0, likesAmount);
         assertEquals(0, jdbcTemplate.query("select user_id from films_likes where film_id = ?",
                 (rs, rn) -> rs.getInt("user_id"), filmId).size());
 
-        filmsLikesDao.deleteLikeFromUser(filmId, userId);
+        filmsLikesDbStorage.deleteLikeFromUser(filmId, userId);
         likesAmount = jdbcTemplate.query("select likes_amount from films where film_id = ?",
                 (rs, rn) -> rs.getInt("likes_amount"), filmId).get(0);
         assertEquals(0, likesAmount);

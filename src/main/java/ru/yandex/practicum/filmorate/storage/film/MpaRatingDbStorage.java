@@ -4,7 +4,7 @@ import ru.yandex.practicum.filmorate.model.MpaRating;
 
 import java.util.List;
 
-public interface MpaRatingDao {
+public interface MpaRatingDbStorage {
     List<MpaRating> getAll();
 
     MpaRating getById(int id);

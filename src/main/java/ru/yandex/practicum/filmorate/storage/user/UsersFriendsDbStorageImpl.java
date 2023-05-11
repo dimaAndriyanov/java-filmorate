@@ -7,20 +7,20 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.CanNotBeFriendWithYourselfException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.DbStorage;
 
 import java.util.List;
 
 @Repository
-public class UsersFriendsDaoImpl implements UsersFriendsDao {
-    private final JdbcTemplate jdbcTemplate;
+public class UsersFriendsDbStorageImpl extends DbStorage implements UsersFriendsDbStorage {
     private final UserStorage userStorage;
     private final UserMapper userMapper;
 
     @Autowired
-    public UsersFriendsDaoImpl(JdbcTemplate jdbcTemplate,
-                               @Qualifier("userDbStorage") UserStorage userStorage,
-                               UserMapper userMapper) {
-        this.jdbcTemplate = jdbcTemplate;
+    public UsersFriendsDbStorageImpl(JdbcTemplate jdbcTemplate,
+                                     @Qualifier("userDbStorage") UserStorage userStorage,
+                                     UserMapper userMapper) {
+        super(jdbcTemplate);
         this.userStorage = userStorage;
         this.userMapper = userMapper;
     }
@@ -54,8 +54,15 @@ public class UsersFriendsDaoImpl implements UsersFriendsDao {
         userStorage.getById(otherId);
         String sqlFirstUserFriendsQuery = "select friend_id from users_friends where user_id = ?";
         String sqlSecondUserFriendsQuery = "select friend_id from users_friends where user_id = ?";
-        String sql = "select * from users where user_id in ("
-                + sqlFirstUserFriendsQuery + " intersect " + sqlSecondUserFriendsQuery + ")";
-        return jdbcTemplate.query(sql, userMapper, id, otherId);
+        String sql = "select u.user_id, " +
+                "u.user_name, " +
+                "u.email, " +
+                "u.login, " +
+                "u.birthday, " +
+                "uf.friend_id, " +
+                "from users u " +
+                "left outer join users_friends uf on u.user_id = uf.user_id " +
+                "where u.user_id in (" + sqlFirstUserFriendsQuery + " intersect " + sqlSecondUserFriendsQuery + ")";
+        return userMapper.mapUsers(jdbcTemplate.queryForRowSet(sql, id, otherId));
     }
 }

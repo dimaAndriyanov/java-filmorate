@@ -5,19 +5,19 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.storage.DbStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 @Repository
-public class FilmsLikesDaoImpl implements FilmsLikesDao {
-    private final JdbcTemplate jdbcTemplate;
+public class FilmsLikesDbStorageImpl extends DbStorage implements FilmsLikesDbStorage {
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
 
     @Autowired
-    public FilmsLikesDaoImpl(JdbcTemplate jdbcTemplate,
-                             @Qualifier("userDbStorage") UserStorage userStorage,
-                             @Qualifier("filmDbStorage") FilmStorage filmstorage) {
-        this.jdbcTemplate = jdbcTemplate;
+    public FilmsLikesDbStorageImpl(JdbcTemplate jdbcTemplate,
+                                   @Qualifier("userDbStorage") UserStorage userStorage,
+                                   @Qualifier("filmDbStorage") FilmStorage filmstorage) {
+        super(jdbcTemplate);
         this.userStorage = userStorage;
         this.filmStorage = filmstorage;
     }
@@ -37,7 +37,7 @@ public class FilmsLikesDaoImpl implements FilmsLikesDao {
     public void deleteLikeFromUser(int filmId, int userId) {
         filmStorage.getById(filmId);
         userStorage.getById(userId);
-        if (!jdbcTemplate.query("select * from films_likes where film_id = ? and user_id = ?",
+        if (!jdbcTemplate.query("select film_id from films_likes where film_id = ? and user_id = ?",
                 (resultSet, rowNumber) -> resultSet.getInt("film_id"), filmId, userId)
                 .isEmpty()) {
             jdbcTemplate.update("delete from films_likes where film_id = ? and user_id = ?", filmId, userId);

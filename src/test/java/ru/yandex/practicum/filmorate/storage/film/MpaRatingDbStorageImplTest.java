@@ -15,12 +15,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-class MpaRatingDaoImplTest {
-    private final MpaRatingDao mpaRatingDao;
+class MpaRatingDbStorageImplTest {
+    private final MpaRatingDbStorage mpaRatingDbStorage;
 
     @Test
     public void testGetAll() {
-        List<MpaRating> mpaRatings = mpaRatingDao.getAll();
+        List<MpaRating> mpaRatings = mpaRatingDbStorage.getAll();
         assertEquals(5, mpaRatings.size());
 
         MpaRating testRating = new MpaRating();
@@ -48,13 +48,13 @@ class MpaRatingDaoImplTest {
 
     @Test
     public void testGetById() {
-        ObjectNotFoundException exception = assertThrows(ObjectNotFoundException.class, () -> mpaRatingDao.getById(6));
+        ObjectNotFoundException exception = assertThrows(ObjectNotFoundException.class, () -> mpaRatingDbStorage.getById(6));
         assertEquals("MPA rating with id 6 not found", exception.getMessage());
 
         MpaRating pg13Rating = new MpaRating();
         pg13Rating.setId(3);
         pg13Rating.setName("PG-13");
 
-        assertEquals(pg13Rating, mpaRatingDao.getById(3));
+        assertEquals(pg13Rating, mpaRatingDbStorage.getById(3));
     }
 }
