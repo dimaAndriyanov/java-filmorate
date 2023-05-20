@@ -26,6 +26,10 @@ public class Film {
     private final LocalDate releaseDate;
     @Positive
     private final int duration;
+    @NotNull
+    private final MpaRating mpa;
+    private final Set<Genre> genres = new HashSet<>();
+
     private final Set<Integer> likesFromUsersIds = new HashSet<>();
 
     public void addLikeFromUserId(int id) {
@@ -38,5 +42,19 @@ public class Film {
 
     public void deleteAllLikes() {
         likesFromUsersIds.clear();
+    }
+
+    public void addGenre(Genre genre) {
+        if (genres.stream().noneMatch(g -> g.getId() == genre.getId())) {
+            genres.add(genre);
+        }
+    }
+
+    public void deleteGenre(Genre genre) {
+        genres.remove(genre);
+    }
+
+    public void deleteAllGenres() {
+        genres.clear();
     }
 }
